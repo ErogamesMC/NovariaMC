@@ -21,51 +21,19 @@ jobs:
             
             const release = context.payload.release;
             const title = release.name || release.tag_name;
-            let desc = release.body || "Sin descripción disponible.";
-            if (desc.length > 1500) {
-              desc = desc.substring(0, 1497) + "...";
-            }
-            
-            // Formatear la fecha
-            const dateObj = new Date(release.published_at);
-            const dateStr = dateObj.toLocaleDateString("es-ES", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              timeZone: "UTC"
-            }) + " UTC";
-            
-            // Formatear la lista de descargas
-            let assetsList = "No hay archivos adjuntos. Ver en [GitHub](<" + release.html_url + ">)";
-            if (release.assets && release.assets.length > 0) {
-              assetsList = release.assets.map(asset => {
-                const sizeMB = (asset.size / (1024 * 1024)).toFixed(2);
-                return `🔹 [${asset.name}](${asset.browser_download_url}) (${sizeMB} MB)`;
-              }).join("\n");
-            }
+            const desc = release.body || "Sin descripción.";
             
             const payload = {
               embeds: [{
-                title: "🚀 " + title,
+                title: title,
                 url: release.html_url,
-                description: desc,
-                color: 3066993, // Verde Esmeralda
-                fields: [
-                  { name: "🏷️ Versión", value: "`" + release.tag_name + "`", inline: true },
-                  { name: "📅 Publicado", value: "`" + dateStr + "`", inline: true },
-                  { name: "📥 Descargas Directas", value: assetsList, inline: false }
-                ],
-                footer: {
-                  text: "GitHub Releases • " + context.repo.repo,
-                  icon_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-                },
+                description: "**Versión:** `" + release.tag_name + "`\n\n" + desc,
+                color: 5814783, // Color Blurple de Discord
                 author: {
                   name: release.author.login,
-                  icon_url: release.author.avatar_url,
-                  url: release.author.html_url
-                }
+                  icon_url: release.author.avatar_url
+                },
+                timestamp: release.published_at
               }]
             };
             
@@ -79,3 +47,4 @@ jobs:
               throw new Error("Discord API respondió con código: " + response.status);
             }
             console.log("Notificación enviada a Discord exitosamente.");
+
